@@ -1,0 +1,20 @@
+﻿version: '3.4'
+
+services:
+  # 1. Database
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: taskmanager-db
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=YourStrong!Password123
+    ports:
+      - "1433:1433"
+
+  # 2. RabbitMQ (The Queue System)
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: taskmanager-rabbit
+    ports:
+      - "5672:5672"   # For your C# code
+      - "15672:15672" # For the Dashboard UI
