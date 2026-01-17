@@ -21,5 +21,24 @@ namespace Onyx.Controllers
         {
             return await _context.Tags.ToListAsync();
         }
+        
+        [HttpPost]
+        public async Task<ActionResult<Tag>> CreateTag([FromBody] TagDto dto)
+        {
+            // 1. Check if it already exists to avoid duplicates
+            var existing = await _context.Tags
+                .FirstOrDefaultAsync(t => t.Name.ToLower() == dto.Name.ToLower());
+            
+            if (existing != null) return Ok(existing);
+
+            // 2. Create if new
+            var tag = new Tag { Name = dto.Name };
+            _context.Tags.Add(tag);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetTags), new { id = tag.Id }, tag);
+        }
+        
+        public class TagDto { public string Name { get; set; } }
     }
 }

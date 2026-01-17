@@ -13,7 +13,7 @@ import {
 } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 import { addTask } from '../features/tasks/taskSlice';
-import { fetchTags } from '../features/tags/tagSlice';
+import { createTag, fetchTags } from '../features/tags/tagSlice';
 import type { AppDispatch, RootState } from '../store';
 import type { Tag } from '../types';
 
@@ -53,6 +53,35 @@ export default function CreateTaskForm({ currentUserId }: CreateTaskFormProps) {
       dispatch(fetchTags());
     }
   }, [open, dispatch]);
+
+  const handleTagsChange = async (event: any, newValue: (string | Tag)[]) => {
+    const lastItem = newValue[newValue.length - 1];
+
+    // CASE 1: User typed a NEW string and hit Enter
+    if (typeof lastItem === 'string') {
+      // 1. Optimistically add it to UI (optional, but feels faster)
+      // setSelectedTags([...selectedTags, { id: 0, name: lastItem }]);
+
+      try {
+        // 2. Dispatch API Call immediately
+        // unwrap() allows us to get the actual returned Tag object
+        const newRealTag = await dispatch(createTag(lastItem)).unwrap();
+
+        // 3. Update state with the REAL backend object (now has ID)
+        setSelectedTags((prev) => [...prev, newRealTag]);
+      } catch (error) {
+        console.error('Failed to create tag', error);
+        // Optionally show error toast
+      }
+    }
+    // CASE 2: User selected an EXISTING tag (Object)
+    else {
+      // Just update the state normally
+      // We cast newValue to Tag[] because we handled the string case above
+      const validTags = newValue.filter((x) => typeof x !== 'string') as Tag[];
+      setSelectedTags(validTags);
+    }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -119,27 +148,34 @@ export default function CreateTaskForm({ currentUserId }: CreateTaskFormProps) {
 
             <Grid item xs={12}>
               <Autocomplete
+                freeSolo
                 multiple
                 options={availableTags}
-                getOptionLabel={(option) => option.name}
+                getOptionLabel={(option) => {
+                  // Handle case where option is a string (user typed new tag)
+                  if (typeof option === 'string') return option;
+                  return option.name;
+                }}
                 value={selectedTags}
                 isOptionEqualToValue={(option, value) => option.id === value.id}
-                onChange={(event, newValue) => {
-                  setSelectedTags(newValue);
-                }}
+                onChange={handleTagsChange}
                 renderInput={(params) => (
                   <TextField
                     {...params}
-                    variant="outlined"
                     label="Tags"
-                    placeholder="Select tags..."
+                    placeholder="Type & Enter to Create..."
+                    helperText="Press Enter to create a new tag immediately"
                   />
                 )}
                 renderValue={(value, getTagProps) =>
-                  value.map((option, index) => {
-                    const { key, ...tagProps } = getTagProps({ index });
-                    return <Chip key={key} variant="outlined" label={option.name} {...tagProps} />;
-                  })
+                  value.map((option, index) => (
+                    <Chip
+                      variant="outlined"
+                      // Handle potential temp state (string) vs real object
+                      label={typeof option === 'string' ? option : option.name}
+                      {...getTagProps({ index })}
+                    />
+                  ))
                 }
               />
             </Grid>

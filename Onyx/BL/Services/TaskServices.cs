@@ -94,5 +94,6 @@ namespace Onyx.BL.Services
         {
             await _repository.DeleteTaskAsync(id);
         }
+        
     }
 }

@@ -25,11 +25,11 @@ public class TaskRepository : ITaskRepository
     public async Task<IEnumerable<TaskItem>> GetTasksByUserIdAsync(int userId)
     {
         return await _context.Tasks
-            .Where(t => t.UserId == userId)   // <--- The Filter!
-            .Include(t => t.User)             // 1. Get the User details
-            .Include(t => t.TaskTags)         // 2. Get the link table
-            .ThenInclude(tt => tt.Tag)    // 3. Get the Tag names
-            .OrderByDescending(t => t.Id)     // Optional: Show newest tasks first
+            .Where(t => t.UserId == userId)
+            .Include(t => t.User)
+            .Include(t => t.TaskTags)
+            .ThenInclude(tt => tt.Tag)
+            .OrderByDescending(t => t.Id)
             .ToListAsync();
     }
 
