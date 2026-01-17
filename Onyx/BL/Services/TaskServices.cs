@@ -26,29 +26,38 @@ namespace Onyx.BL.Services
             foreach (var task in tasks)
             {
                 if (task.DueDate.HasValue && 
-                    task.DueDate.Value < DateTime.Now && 
-                    !task.IsCompleted)
+                    task.DueDate.Value < DateTime.Now 
+                    && !task.IsReminderSent)
                 {
-                    // Create a specific "Reminder" message
-                    var message = new 
-                    { 
-                        TaskId = task.Id, 
-                        Title = task.Title,
-                        Action = "TaskExpired", // Different action name!
-                        Timestamp = DateTime.Now 
-                    };
+                    // handles the refresh spamming problem.
+                    // if we have 3 workers instances the RabbitMQ deals with it automatically.
+                    bool updateIsReminderSent = await _repository.TryMarkReminderAsSentAsync(task.Id);
+                    if (updateIsReminderSent)
+                    {
+                        // Create a specific "Reminder" message
+                        var message = new 
+                        { 
+                            TaskId = task.Id, 
+                            Title = task.Title,
+                            Action = "TaskExpired", // Different action name!
+                            Timestamp = DateTime.Now 
+                        };
 
-                    // Send to Queue (Fire and forget - don't wait too long)
-                    try 
-                    {
-                        // We use await here to ensure it sends, 
-                        // but typically this is very fast (milliseconds)
-                        await _producer.SendMessageAsync(message);
+                        // Send to Queue (Fire and forget - don't wait too long)
+                        try 
+                        {
+                            // We use await here to ensure it sends, 
+                            // but typically this is very fast (milliseconds)
+                            await _producer.SendMessageAsync(message);
+                        }
+                        catch (Exception ex)
+                        {
+                            // If RabbitMQ is down, we swallow the error so the user isn't affected.
+                            // In a real app, you would log this: _logger.LogError(ex, "Failed to send queue message");
+                            Console.WriteLine($"Queue Error: {ex.Message}");
+                        }
                     }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Queue Error: {ex.Message}");
-                    }
+
                 }
             }
             
@@ -62,10 +71,6 @@ namespace Onyx.BL.Services
 
         public async Task<TaskItem> CreateTaskAsync(TaskItem task, List<int> tagIds)
         {
-            // Business Rule Example: Ensure DueDate is not in the past
-            // if (task.DueDate < DateTime.Now) throw new Exception("Due date cannot be in the past");
-
-            // Prepare Tags logic
             task.TaskTags = new List<TaskTag>();
             if (tagIds.Any())
             {
@@ -82,25 +87,6 @@ namespace Onyx.BL.Services
         public async Task UpdateTaskAsync(TaskItem task)
         {
             await _repository.UpdateTaskAsync(task);
-            
-            //  Non-Critical Step: Send Background Message
-            try 
-            {
-                var message = new 
-                { 
-                    TaskId = task.Id, 
-                    Action = "TaskUpdated", 
-                    Timestamp = DateTime.Now 
-                };
-        
-                await _producer.SendMessageAsync(message);
-            }
-            catch (Exception ex)
-            {
-                // If RabbitMQ is down, we swallow the error so the user isn't affected.
-                // In a real app, you would log this: _logger.LogError(ex, "Failed to send queue message");
-                Console.WriteLine($"RabbitMQ Error: {ex.Message}");
-            }
             
         }
 

@@ -10,4 +10,5 @@ public interface ITaskRepository
     Task AddTaskAsync(TaskItem task);
     Task UpdateTaskAsync(TaskItem task);
     Task DeleteTaskAsync(int id);
+    Task<bool> TryMarkReminderAsSentAsync(int taskId);
 }

@@ -18,7 +18,7 @@ public class RabbitMQProducer : IRabbitMQProducer
         using var channel = await connection.CreateChannelAsync();
 
         // 3. Declare Queue
-        await channel.QueueDeclareAsync(queue: "task_updates",
+        await channel.QueueDeclareAsync(queue: "TaskExpired",
             durable: false,
             exclusive: false,
             autoDelete: false,
@@ -31,7 +31,7 @@ public class RabbitMQProducer : IRabbitMQProducer
         // 5. Publish (Async)
         // Note: The arguments order changed slightly in v7
         await channel.BasicPublishAsync(exchange: "",
-            routingKey: "task_updates",
+            routingKey: "TaskExpired",
             mandatory: false, 
             basicProperties: new BasicProperties(), 
             body: body);

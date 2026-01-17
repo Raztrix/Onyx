@@ -88,6 +88,32 @@ public class TaskRepository : ITaskRepository
 
         await _context.SaveChangesAsync();
     }
+    
+    public async Task<bool> TryMarkReminderAsSentAsync(int taskId)
+    {
+
+        var task = await _context.Tasks.FindAsync(taskId);
+        
+        if (task == null || task.IsReminderSent) 
+        {
+            return false; 
+        }
+
+        task.IsReminderSent = true;
+    
+        try 
+        {
+            // SaveChanges returns the number of rows affected.
+            // If concurrency hits, this might throw or return 0 depending on setup.
+            await _context.SaveChangesAsync();
+            return true; // We won!
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            // Someone else updated it just now. We lost.
+            return false;
+        }
+    }
 
     public async Task DeleteTaskAsync(int id)
     {
