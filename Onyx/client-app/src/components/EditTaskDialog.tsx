@@ -60,7 +60,7 @@ export default function EditTaskDialog({ open, onClose, task }: Props) {
     }
   }, [task, open, dispatch]);
 
-  const handleTagsChange = async (event: any, newValue: (string | Tag)[]) => {
+  const handleTagsChange = async (_event: any, newValue: (string | Tag)[]) => {
     const lastItem = newValue[newValue.length - 1];
 
     // CASE 1: User typed a NEW string and hit Enter
@@ -176,14 +176,18 @@ export default function EditTaskDialog({ open, onClose, task }: Props) {
             />
           )}
           renderValue={(value, getTagProps) =>
-            value.map((option, index) => (
-              <Chip
-                variant="outlined"
-                // Handle potential temp state (string) vs real object
-                label={typeof option === 'string' ? option : option.name}
-                {...getTagProps({ index })}
-              />
-            ))
+            value.map((option, index) => {
+              const { key, ...tagProps } = getTagProps({ index });
+              return (
+                <Chip
+                  variant="outlined"
+                  // Handle potential temp state (string) vs real object
+                  label={typeof option === 'string' ? option : option.name}
+                  key={key}
+                  {...tagProps}
+                />
+              );
+            })
           }
         />
       </DialogContent>

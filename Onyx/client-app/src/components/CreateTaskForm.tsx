@@ -7,7 +7,6 @@ import {
   DialogContent,
   DialogTitle,
   MenuItem,
-  Grid,
   Autocomplete,
   Chip,
 } from '@mui/material';
@@ -16,6 +15,7 @@ import { addTask } from '../features/tasks/taskSlice';
 import { createTag, fetchTags } from '../features/tags/tagSlice';
 import type { AppDispatch, RootState } from '../store';
 import type { Tag } from '../types';
+import Grid from '@mui/material/Grid';
 
 interface FormData {
   title: string;
@@ -54,7 +54,7 @@ export default function CreateTaskForm({ currentUserId }: CreateTaskFormProps) {
     }
   }, [open, dispatch]);
 
-  const handleTagsChange = async (event: any, newValue: (string | Tag)[]) => {
+  const handleTagsChange = async (_event: any, newValue: (string | Tag)[]) => {
     const lastItem = newValue[newValue.length - 1];
 
     // CASE 1: User typed a NEW string and hit Enter
@@ -119,7 +119,7 @@ export default function CreateTaskForm({ currentUserId }: CreateTaskFormProps) {
         <DialogTitle>Create New Task</DialogTitle>
         <DialogContent>
           <Grid container spacing={2} sx={{ mt: 1 }}>
-            <Grid item xs={12}>
+            <Grid size={12}>
               <TextField
                 autoFocus
                 name="title"
@@ -132,7 +132,7 @@ export default function CreateTaskForm({ currentUserId }: CreateTaskFormProps) {
               />
             </Grid>
 
-            <Grid item xs={12}>
+            <Grid size={12}>
               <TextField
                 name="description"
                 label="Description"
@@ -146,7 +146,7 @@ export default function CreateTaskForm({ currentUserId }: CreateTaskFormProps) {
               />
             </Grid>
 
-            <Grid item xs={12}>
+            <Grid size={12}>
               <Autocomplete
                 freeSolo
                 multiple
@@ -168,19 +168,23 @@ export default function CreateTaskForm({ currentUserId }: CreateTaskFormProps) {
                   />
                 )}
                 renderValue={(value, getTagProps) =>
-                  value.map((option, index) => (
-                    <Chip
-                      variant="outlined"
-                      // Handle potential temp state (string) vs real object
-                      label={typeof option === 'string' ? option : option.name}
-                      {...getTagProps({ index })}
-                    />
-                  ))
+                  value.map((option, index) => {
+                    const { key, ...tagProps } = getTagProps({ index });
+                    return (
+                      <Chip
+                        variant="outlined"
+                        // Handle potential temp state (string) vs real object
+                        label={typeof option === 'string' ? option : option.name}
+                        key={key}
+                        {...tagProps}
+                      />
+                    );
+                  })
                 }
               />
             </Grid>
 
-            <Grid item xs={6}>
+            <Grid size={6}>
               <TextField
                 select
                 name="priority"
@@ -195,7 +199,7 @@ export default function CreateTaskForm({ currentUserId }: CreateTaskFormProps) {
               </TextField>
             </Grid>
 
-            <Grid item xs={6}>
+            <Grid size={6}>
               <TextField
                 name="dueDate"
                 label="Due Date"
