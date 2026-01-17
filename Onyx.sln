@@ -5,6 +5,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Onyx", "Onyx\Onyx.csproj", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Onyx.Worker", "Onyx.Worker\Onyx.Worker.csproj", "{9BF472E5-5066-4A0E-99C2-C24CAA44E16C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Onyx.Tests", "Onyx.Tests\Onyx.Tests.csproj", "{859FDE38-A3DC-49E8-9F35-F79B9E9AF88A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -19,5 +21,9 @@ Global
 		{9BF472E5-5066-4A0E-99C2-C24CAA44E16C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9BF472E5-5066-4A0E-99C2-C24CAA44E16C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9BF472E5-5066-4A0E-99C2-C24CAA44E16C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{859FDE38-A3DC-49E8-9F35-F79B9E9AF88A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{859FDE38-A3DC-49E8-9F35-F79B9E9AF88A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{859FDE38-A3DC-49E8-9F35-F79B9E9AF88A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{859FDE38-A3DC-49E8-9F35-F79B9E9AF88A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
