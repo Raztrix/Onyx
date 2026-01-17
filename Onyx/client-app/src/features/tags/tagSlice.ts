@@ -18,7 +18,7 @@ export const fetchTags = createAsyncThunk('tags/fetchTags', async () => {
 });
 
 export const createTag = createAsyncThunk('tags/createTag', async (tagName: string) => {
-  const response = await fetch('https://localhost:7225/api/tags', {
+  const response = await fetch('http://localhost:5000/api/tags', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ name: tagName }),

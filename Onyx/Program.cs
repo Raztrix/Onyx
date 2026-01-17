@@ -9,7 +9,18 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+{
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        sqlOptions => 
+        {
+            sqlOptions.EnableRetryOnFailure(
+                maxRetryCount: 5,       // Try 5 times
+                maxRetryDelay: TimeSpan.FromSeconds(10), // Wait up to 10s between tries
+                errorNumbersToAdd: null // Use default error codes
+            );
+        });
+});
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
@@ -33,7 +44,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowReactApp",
         policy =>
         {
-            policy.WithOrigins("http://localhost:5173") // Your Vite Frontend Port
+            policy.WithOrigins("http://localhost:3000") // Your Docker Frontend Port
                 .AllowAnyHeader()
                 .AllowAnyMethod();
         });

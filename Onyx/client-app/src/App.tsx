@@ -76,7 +76,7 @@ function App() {
 
         <Grid container spacing={3}>
           {tasks.map((task) => (
-            <Grid item xs={12} sm={6} key={task.id}>
+            <Grid size={{ xs: 12, sm: 6 }} key={task.id}>
               <TaskCard task={task} onDelete={handleDelete} />
             </Grid>
           ))}

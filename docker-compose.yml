@@ -1,0 +1,54 @@
+﻿services:
+  # 1. Database
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: taskmanager-db
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=YourStrong!Password123
+    ports:
+      - "1433:1433"
+    volumes:
+      - sql_data:/var/opt/mssql
+
+  # 2. RabbitMQ
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: taskmanager-rabbit
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  # 3. Backend API
+  onyx-api:
+    image: onyx-api
+    build:
+      context: ./Onyx
+      dockerfile: Dockerfile
+    container_name: onyx-api
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=db;Database=OnyxDb;User Id=sa;Password=YourStrong!Password123;TrustServerCertificate=True;
+      - RabbitMQ__Host=rabbitmq
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+    ports:
+      - "5000:80"
+    depends_on:
+      - db
+      - rabbitmq
+
+  # 4. Frontend Client
+  onyx-client:
+    image: onyx-client
+    build:
+      # UPDATED PATH: Points to Onyx/Onyx/client-app
+      context: ./Onyx/client-app
+      dockerfile: Dockerfile
+    container_name: onyx-client
+    ports:
+      - "3000:80"
+    depends_on:
+      - onyx-api
+
+volumes:
+  sql_data:
